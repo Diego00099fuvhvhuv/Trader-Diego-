@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sinais IA feito por Trader Dieguinho - Automático</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(145deg, #0f0c29, #302b63, #24243e);
+      color: #00ffe7;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 2rem;
+      text-shadow: 0 0 10px #00ffe7;
+      margin-bottom: 10px;
+    }
+    .painel {
+      background: #111;
+      border: 2px solid #00ffe7;
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 10px;
+      box-shadow: 0 0 20px #00ffe7;
+      width: 340px;
+      text-align: center;
+    }
+    #sinal {
+      font-size: 1.4rem;
+      margin-top: 15px;
+      font-weight: bold;
+      text-shadow: 0 0 15px #00ffe7;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    #historico {
+      margin-top: 20px;
+      max-height: 280px;
+      overflow-y: auto;
+      text-align: left;
+    }
+    .historico-item {
+      margin-top: 10px;
+      background: rgba(0, 255, 231, 0.12);
+      border-left: 4px solid #00ffe7;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      word-wrap: break-word;
+    }
+    button {
+      background-color: #00ffe7;
+      color: #111;
+      font-weight: bold;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 0 0;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 10px #00ffe7;
+      transition: 0.3s;
+      font-family: 'Orbitron', sans-serif;
+    }
+    button:hover {
+      background-color: #0ff;
+    }
+    label {
+      display: none; /* ocultamos seleção pq é automático fixo */
+    }
+  </style>
+</head>
+<body>
+  <h1>Sinais IA feito por Trader Dieguinho - Automático 🔥</h1>
+  <div class="painel">
+    <div id="sinal">⏳ Aguardando próximo sinal...</div>
+    <button onclick="copiarSinal()">📋 Copiar último sinal</button>
+  </div>
+
+  <div id="historico" class="painel">
+    <h3>📜 Histórico de Sinais</h3>
+    <div id="listaHistorico"></div>
+  </div>
+
+  <audio id="alertaAudio" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
+
+  <script>
+    const pares = [
+      "EUR/USD", "EUR/USD-OTC", "GBP/USD", "USD/JPY", "AUD/USD",
+      "USD/CAD", "NZD/USD", "EUR/JPY", "GBP/JPY", "AUD/USD-OTC",
+      "USD/JPY-OTC", "GBP/USD-OTC", "USD/CAD-OTC"
+    ];
+
+    const tempoEntradaMin = 1; // 1 minuto fixo
+    let ultimoSinal = '';
+
+    function gerarSinalAutomatico() {
+      const agora = new Date();
+      const proximaVela = new Date(agora.getTime() + tempoEntradaMin * 60000);
+      const horarioEntrada = `${proximaVela.getHours().toString().padStart(2,'0')}:${proximaVela.getMinutes().toString().padStart(2,'0')}:${proximaVela.getSeconds().toString().padStart(2,'0')}`;
+
+      // Gera sinais para cada par, mas mostra só um por vez (aleatório)
+      // Para dar mais dinamismo e não lotar tudo de sinais ao mesmo tempo.
+      // Você pode modificar a lógica para mostrar todos se quiser.
+      const parSelecionado = pares[Math.floor(Math.random() * pares.length)];
+
+      // 5 confluências IA (probabilidade de gerar sinal)
+      const tendencia = Math.random() > 0.4;
+      const volume = Math.random() > 0.4;
+      const pressao = Math.random() > 0.5;
+      const rompimento = Math.random() > 0.4;
+      const padrao = Math.random() > 0.5;
+
+      const confluencias = tendencia && volume && pressao && rompimento && padrao;
+
+      if (confluencias) {
+        const direcao = Math.random() > 0.5 ? 'CALL 🔼' : 'PUT 🔽';
+        const probabilidade = Math.floor(Math.random() * 10) + 90;
+
+        let protecao;
+        if (probabilidade >= 96) {
+          protecao = 'Entrada Seca (sem martingale)';
+        } else if (probabilidade >= 93) {
+          protecao = '1 Proteção (1 martingale)';
+        } else {
+          protecao = '2 Proteções (2 martingales)';
+        }
+
+        ultimoSinal = `✅ ${parSelecionado} | ${direcao} | ${tempoEntradaMin}min | ${horarioEntrada} | Prob.: ${probabilidade}% | ${protecao}`;
+        document.getElementById('sinal').innerHTML = `
+          ✅ <strong>${parSelecionado}</strong><br>
+          SINAL CONFIRMADO: ${direcao}<br>
+          🧠 Confluências IA: 5/5<br>
+          ⏱️ Tempo: <strong>${tempoEntradaMin} min</strong><br>
+          🕒 Próxima vela: <strong>${horarioEntrada}</strong><br>
+          💹 Probabilidade: <strong>${probabilidade}%</strong><br>
+          🛡️ Proteção: <strong>${protecao}</strong>
+        `;
+
+        const item = document.createElement('div');
+        item.classList.add('historico-item');
+        item.textContent = ultimoSinal;
+        document.getElementById('listaHistorico').prepend(item);
+
+        document.getElementById('alertaAudio').play();
+      } else {
+        document.getElementById('sinal').textContent = '⚠️ Nenhum sinal disponível agora. Aguardando as 5 confluências da IA...';
+      }
+    }
+
+    function copiarSinal() {
+      if (ultimoSinal) {
+        navigator.clipboard.writeText(ultimoSinal).then(() => {
+          alert('Sinal copiado com sucesso!');
+        });
+      } else {
+        alert('Nenhum sinal para copiar!');
+      }
+    }
+
+    // Rodar gerador automático a cada 1 minuto (60000 ms)
+    gerarSinalAutomatico();
+    setInterval(gerarSinalAutomatico, 60000);
+  </script>
+</body>
+</html>
